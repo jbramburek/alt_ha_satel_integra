@@ -80,20 +80,10 @@ class SatelEncryption:
 
 
 class EncryptedCommunicationHandler:
-    """Handler for Satel encrypted communications.
-
-    :param integration_key:
-        Satel integration key to be used for encrypting and decrypting data.
-
-    """
-
     next_id_s: int = 0
 
     def __init__(self, integration_key: str):
         self._rolling_counter: int = 0
-        # There will be a new value of id_s for each instance . As there will
-        # be rather one client this doesn't have much use. However id_s value
-        # may show how many reconnections there where.
         self._set_id_s()
         self._id_r: int = 0
         self._satel_encryption = SatelEncryption(integration_key)
@@ -111,38 +101,15 @@ class EncryptedCommunicationHandler:
         self._rolling_counter += 1
         self._rolling_counter &= 0xFFFF
 
-        # int randomValue = this.rand.nextInt();
-        # data[0] = (byte) (randomValue >> 8);
-        # data[1] = (byte) (randomValue & 0xff);
-        # data[2] = (byte) (this.rollingCounter >> 8);
-        # data[3] = (byte) (this.rollingCounter & 0xff);
-        # data[4] = this.idS = (byte) this.rand.nextInt();
-        # data[5] = this.idR;
-        # ++this.rollingCounter;
-
         return header
 
     def prepare_pdu(self, message: bytes) -> bytes:
         _LOGGER.debug(f'Prepare protocol data unit for {message.hex()=}')
-        """.
-
-        :param message: message to be included in PDU
-
-        :returns: encrypted PDU with given message
-
-        """
         pdu = self._prepare_header() + message
         encrypted_pdu = self._satel_encryption.encrypt(pdu)
         return encrypted_pdu
 
     def extract_data_from_pdu(self, pdu: bytes) -> bytes:
-        """Extract data from protocol data unit.
-
-        :param pdu: PDU from which a message to be extracted
-
-        :returns: extracted message
-
-        """
         decrypted_pdu = self._satel_encryption.decrypt(pdu)
         header = decrypted_pdu[:6]
         data = decrypted_pdu[6:]

@@ -4,7 +4,7 @@ import collections
 import logging
 from binascii import hexlify
 from enum import Enum, unique
-import satel_integra_module_encryption as encryption
+from .satel_integra_module_encryption import EncryptedCommunicationHandler
 
 _LOGGER = logging.getLogger(__name__)
 END_SEQUENCE = b'\xFE\x0D'
@@ -223,7 +223,7 @@ class AsyncSatel:
 
         if integration_key is not None and isinstance(integration_key, str) and len(integration_key) > 0:
             _LOGGER.debug('Creating encryption handler')
-            self._encryption_handler = encryption.EncryptedCommunicationHandler(integration_key)
+            self._encryption_handler = EncryptedCommunicationHandler(integration_key)
 
         self._message_handlers = {
             SatelCommand.RESULT:                    [self._command_result],
